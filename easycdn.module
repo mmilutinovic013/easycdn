@@ -54,12 +54,9 @@ function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form
       )
     );
   variable_set('easycdn', $settings);
-  $libraries = $form['libraries']['list']['#rows'];
-  foreach ($libraries as $library => $properties) {
-    $rows = $properties['data'];
-    foreach ($rows as $row => $value) {
-      dpm($row[0]);
-    }
+  $rows = &$form['libraries']['list']['#rows'];
+  foreach ($rows as $row => $value) {
+    $rows[$row]['data'][3] = t('Local'); // This will be where we decide what CDN we are using
   } 
   $form['libraries']['list']['#header'][2] = "Version";
   $form['libraries']['list']['#header'][4] = "Local Actions";
