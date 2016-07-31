@@ -34,7 +34,6 @@ function easycdn_module_implements_alter(&$implementations, $hook) {
 }
 
 function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form_id) {
-  variable_get()
   dpm($form);
   $settings = array(
     'name' => '',
@@ -55,11 +54,13 @@ function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form
       )
     );
   variable_set('easycdn', $settings);
-  drush_print_r(variable_get('easycdn'));
-
-  if ($easycdn['version']) {
-    $rows['version'] = array('<strong>' . t('Version') . '</strong>', l($easycdn['version'], $easycdn['version']));
-  }
+  $libraries = $form['libraries']['list']['#rows'];
+  foreach ($libraries as $library => $properties) {
+    $rows = $properties['data'];
+    foreach ($rows as $row => $value) {
+      dpm($row[0]);
+    }
+  } 
   $form['libraries']['list']['#header'][2] = "Version";
   $form['libraries']['list']['#header'][4] = "Local Actions";
 }
