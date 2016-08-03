@@ -55,23 +55,26 @@ function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form
     );
   variable_set('easycdn', $settings);
   $rows = &$form['libraries']['list']['#rows'];
-  $form['choices'] = array(
-      '#title' => t('Test'),
-      '#type' => 'select', 
-      '#options' => array(
-        0  => t('jsDelivr (Supported in China)'),
-        1  => t('CDNJS (Limited China Support)'),
-        2 => t('Local'),
-        ),
-      '#default_value' => 2,
-   );
+  $options['choices'] = array(
+    '#type' => 'select', 
+    '#options' => array(
+      0  => t('jsDelivr (Supported in China)'),
+      1  => t('CDNJS (Limited China Support)'),
+      2 => t('Local'),
+      ),
+    '#default_value' => 2,
+  );
   foreach ($rows as $row => $value) {
     $rows[$row]['data'][3] = t('Local'); // This will be where we decide what CDN we are using
-    $rows[$row]['data'][4] = $form['choices']['#options'];
+    $rows[$row]['data'][4] = render($options);
   }
   dpm($form);
   $form['libraries']['list']['#header'][2] = "Version";
   $form['libraries']['list']['#header'][4] = "Local Actions";
+  $form['choices']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
 }
 
 /**
