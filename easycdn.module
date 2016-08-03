@@ -34,7 +34,6 @@ function easycdn_module_implements_alter(&$implementations, $hook) {
 }
 
 function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form_id) {
-  dpm($form);
   $settings = array(
     'name' => '',
     'version' => array(
@@ -53,8 +52,6 @@ function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form
       'status' => FALSE
       )
     );
-  variable_set('easycdn', $settings);
-  $rows = &$form['libraries']['list']['#rows'];
   $options['choices'] = array(
     '#type' => 'select', 
     '#options' => array(
@@ -63,11 +60,14 @@ function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form
       2 => t('Local'),
       ),
     '#default_value' => 2,
-  );
+    );
   $download['choices'] = array(
     '#type' => 'button',
     '#value' => 'Download to Libraries',
+    '#submit' => array('download_form_button_submit')
     );
+  variable_set('easycdn', $settings);
+  $rows = &$form['libraries']['list']['#rows'];
   foreach ($rows as $row => $value) {
     $rows[$row]['data'][3] = render($options);
     $rows[$row]['data'][4] = render($download);
@@ -78,6 +78,7 @@ function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form
   $form['choices']['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Save CDN Settings',
+    '#submit' => array('save_form_button_submit')
   );
 }
 
@@ -143,6 +144,22 @@ function easycdn_js_alter(&$javascript) {
       }
     }
   }
+}
+
+function download_form_button_submit($form, &$form_state) {
+// Don't forget to pass $form_state by reference 
+// Optionally, do some processing here if you wish - such as saving the edited values
+  my_node_update_function();
+  unset($form_state['storage']); 
+  $form_state['redirect'] = 'my_module/data/list'; // <- this path should be one of your menu items.
+}
+
+function save_form_button_submit($form, &$form_state) {
+// Don't forget to pass $form_state by reference 
+// Optionally, do some processing here if you wish - such as saving the edited values
+  my_node_update_function();
+  unset($form_state['storage']); 
+  $form_state['redirect'] = 'my_module/data/list'; // <- this path should be one of your menu items.
 }
 
 function getVersions($name) {
