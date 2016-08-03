@@ -64,16 +64,20 @@ function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form
       ),
     '#default_value' => 2,
   );
+  $download['choices'] = array(
+    '#type' => 'button',
+    '#value' => 'Download to Libraries',
+    );
   foreach ($rows as $row => $value) {
-    $rows[$row]['data'][3] = t('Local'); // This will be where we decide what CDN we are using
-    $rows[$row]['data'][4] = render($options);
+    $rows[$row]['data'][3] = render($options);
+    $rows[$row]['data'][4] = render($download);
   }
   dpm($form);
   $form['libraries']['list']['#header'][2] = "Version";
   $form['libraries']['list']['#header'][4] = "Local Actions";
   $form['choices']['submit'] = array(
     '#type' => 'submit',
-    '#value' => 'Save',
+    '#value' => 'Save CDN Settings',
   );
 }
 
