@@ -149,17 +149,15 @@ function easycdn_js_alter(&$javascript) {
 function download_form_button_submit($form, &$form_state) {
 // Don't forget to pass $form_state by reference 
 // Optionally, do some processing here if you wish - such as saving the edited values
-  my_node_update_function();
-  unset($form_state['storage']); 
-  $form_state['redirect'] = 'my_module/data/list'; // <- this path should be one of your menu items.
+  drupal_get_form($form);
+  $form_state['redirect'] = 'admin/reports/libraries'; // <- this path should be one of your menu items.
 }
 
 function save_form_button_submit($form, &$form_state) {
 // Don't forget to pass $form_state by reference 
 // Optionally, do some processing here if you wish - such as saving the edited values
-  my_node_update_function();
-  unset($form_state['storage']); 
-  $form_state['redirect'] = 'my_module/data/list'; // <- this path should be one of your menu items.
+  drupal_get_form($form);
+  $form_state['redirect'] = 'admin/reports/libraries'; // <- this path should be one of your menu items.
 }
 
 function getVersions($name) {
