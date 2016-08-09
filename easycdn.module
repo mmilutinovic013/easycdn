@@ -52,39 +52,47 @@ function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form
       'status' => FALSE
       )
     );
-  $form['cdns'] = array(
+  variable_set('easycdn', $settings);
+  $rows = $form['libraries']['list']['#rows'];
+  foreach ($rows as $row => $value) {
+    $cdn = array(
     '#type' => 'select', 
+    '#id' => $row . 'CDN-',
     '#options' => array(
       0 => t('Local'),
       1 => t('jsDelivr (Supported in China)'),
       2 => t('CDNJS (Limited China Support)'),
       ),
     );
-  $form['download'] = array(
+    $download = array(
     '#type' => 'button',
+    '#id' => $row . 'Download-',
     '#value' => t('Download to Libraries'),
     '#submit' => array('download_form_button_submit')
     );
-  variable_set('easycdn', $settings);
-  $rows = &$form['libraries']['list']['#rows'];
-  foreach ($rows as $row => $value) {
-    $rows[$row]['data'][3] = render($form['libraries']['cdns']);
-    $rows[$row]['data'][4] = render($form['download']);
+    
+     $form['libraries'][] = array(
+       'cdn' => &$cdn,
+       'download' => &$download,
+    );
+  
+    $form['libraries']['list']['#rows'][$row]['data'][3] = array('data' => &$cdn);
+    $form['libraries']['list']['#rows'][$row]['data'][4] = array('data' => &$download);
+    unset($cdn);
+    unset($download);
   }
+  $form['#tree'] = TRUE;
+  $form['libraries']['#tree'] = TRUE;
   $form['libraries']['list']['#header'][2] = "Version";
   $form['libraries']['list']['#header'][4] = "Local Actions";
-  $form['choices']['submit'] = array(
+  $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save CDN Settings'),
   );
-  $form['#submit'][]='easycdn_form_libraries_admin_overview_submit';
+  $form['#submit'][] = 'easycdn_form_libraries_admin_overview_submit';
+  dpm($form);
 }
 
-function easycdn_form_libraries_admin_overview_submit($form, &$form_state) {
-// Clean the form_state and then rebuild the form 
-  form_state_values_clean($form_state);
-  $form_state['rebuild'] = TRUE;  
-}
 
 /**
  * Implements hook_js_alter().
