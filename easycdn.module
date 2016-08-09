@@ -33,67 +33,6 @@ function easycdn_module_implements_alter(&$implementations, $hook) {
   }
 }
 
-function easycdn_form_libraries_admin_overview_alter(&$form, &$form_state, $form_id) {
-  $settings = array(
-    'name' => '',
-    'version' => array(
-      'current' => '',
-      'available' => array()
-      ),
-    'serving location' => array(
-      'current' => '',
-      'available' => array(
-        'local',
-        'cdn' => array(
-          'jsdelivr',
-          'cdnjs',
-          )
-        ),
-      'status' => FALSE
-      )
-    );
-  variable_set('easycdn', $settings);
-  $rows = $form['libraries']['list']['#rows'];
-  foreach ($rows as $row => $value) {
-    $cdn = array(
-    '#type' => 'select', 
-    '#id' => $row . 'CDN-',
-    '#options' => array(
-      0 => t('Local'),
-      1 => t('jsDelivr (Supported in China)'),
-      2 => t('CDNJS (Limited China Support)'),
-      ),
-    );
-    $download = array(
-    '#type' => 'button',
-    '#id' => $row . 'Download-',
-    '#value' => t('Download to Libraries'),
-    '#submit' => array('download_form_button_submit')
-    );
-    
-     $form['libraries'][] = array(
-       'cdn' => &$cdn,
-       'download' => &$download,
-    );
-  
-    $form['libraries']['list']['#rows'][$row]['data'][3] = array('data' => &$cdn);
-    $form['libraries']['list']['#rows'][$row]['data'][4] = array('data' => &$download);
-    unset($cdn);
-    unset($download);
-  }
-  $form['#tree'] = TRUE;
-  $form['libraries']['#tree'] = TRUE;
-  $form['libraries']['list']['#header'][2] = "Version";
-  $form['libraries']['list']['#header'][4] = "Local Actions";
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save CDN Settings'),
-  );
-  $form['#submit'][] = 'easycdn_form_libraries_admin_overview_submit';
-  dpm($form);
-}
-
-
 /**
  * Implements hook_js_alter().
  */
@@ -104,7 +43,7 @@ function easycdn_js_alter(&$javascript) {
       $arr = explode("/", $path_end, 2);
       $name = $arr[0];
       $library = libraries_detect("$name");
-      if (variable_get('CDN_CHOICE') === 'CDN_CDNJS') {
+      if (variable_get('easycdn_cdn_' . $name) === 'CDN_CDNJS') {
         $json = file_get_contents('http://api.cdnjs.com/libraries?search=' . $name);
         $data = json_decode($json, true);
         //
@@ -115,7 +54,7 @@ function easycdn_js_alter(&$javascript) {
           $name = $data['results'][0]['name'];
         }
       }
-      elseif (variable_get('CDN_CHOICE') === 'CDN_JSDELIVR') {
+      elseif (variable_get('easycdn_cdn_' . $name) === 'CDN_JSDELIVR') {
         //
         // NOTE: If we can find another way to get the $name out of JSDelivr so that we can get
         // results from a search query that returns more than one library. (i.e. placeholder should be
@@ -127,25 +66,25 @@ function easycdn_js_alter(&$javascript) {
         $cdn_version_arr_elements = getVersions($name);
         if (!empty($cdn_version_arr_elements)) {
           foreach ($cdn_version_arr_elements as $element => $value) {
-            if (variable_get('CDN_CHOICE') === 'CDN_CDNJS') {
+            if (variable_get('easycdn_cdn_' . $name) === 'CDN_CDNJS') {
               $cdn_version_arr_elements_str = $cdn_version_arr_elements[$element]['version'];
             }
-            elseif (variable_get('CDN_CHOICE') === 'CDN_JSDELIVR') {
+            elseif (variable_get('easycdn_cdn_' . $name) === 'CDN_JSDELIVR') {
               $cdn_version_arr_elements_str = $cdn_version_arr_elements[$element];
              }
             if(strcmp($cdn_version_arr_elements_str, $version) === 0) {
-              if (variable_get('CDN_CHOICE') === 'CDN_CDNJS') {
+              if (variable_get('easycdn_cdn_' . $name) === 'CDN_CDNJS') {
                 $files = $cdn_version_arr_elements[$element]['files'];
               }
-              elseif (variable_get('CDN_CHOICE') === 'CDN_JSDELIVR') {
+              elseif (variable_get('easycdn_cdn_' . $name) === 'CDN_JSDELIVR') {
                 $content = file_get_contents('http://api.jsdelivr.com/v1/jsdelivr/libraries/' . $name . '/' . $version);
                 $files = json_decode($content, true);
               }
               foreach ($files as $index => $value) {
-                if (variable_get('CDN_CHOICE') === 'CDN_CDNJS') {
+                if (variable_get('easycdn_cdn_' . $name) === 'CDN_CDNJS') {
                 $javascript[$path]['data'] = 'http://cdnjs.cloudflare.com/ajax/libs/'. $name .'/' . $version .'/' . $files[$index]; //strval($files[$index]);
                 }
-                elseif (variable_get('CDN_CHOICE') === 'CDN_JSDELIVR') {
+                elseif (variable_get('easycdn_cdn_' . $name) === 'CDN_JSDELIVR') {
                   $javascript[$path]['data'] = 'https://cdn.jsdelivr.net/'. $name . '/' . $version . '/' .strval($files[$index]);
                 }
                 $javascript[$name]['type'] = 'external';
@@ -161,7 +100,7 @@ function easycdn_js_alter(&$javascript) {
 function getVersions($name) {
   $versions = array();
   $files = array();
-  if (variable_get('CDN_CHOICE') === 'CDN_JSDELIVR'){
+  if (variable_get('easycdn_cdn_' . $name) === 'CDN_JSDELIVR'){
     $json = file_get_contents('http://api.jsdelivr.com/v1/jsdelivr/libraries?name='. $name .'&fields=versions');
     $data = json_decode($json, true);
     //
@@ -172,7 +111,7 @@ function getVersions($name) {
       $versions = $data[0]['versions'];
     }
   }
-  elseif (variable_get('CDN_CHOICE') === 'CDN_CDNJS') {
+  elseif (variable_get('easycdn_cdn_' . $name) === 'CDN_CDNJS') {
     $json = file_get_contents('http://api.cdnjs.com/libraries/'. $name);
     $files = json_decode($json, true);
     $versions = $files['assets'];
