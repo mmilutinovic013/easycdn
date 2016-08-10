@@ -87,7 +87,7 @@ function easycdn_js_alter(&$javascript) {
                 elseif (variable_get('easycdn_cdn_' . $name) === 'CDN_JSDELIVR') {
                   $javascript[$path]['data'] = 'https://cdn.jsdelivr.net/'. $name . '/' . $version . '/' .strval($files[$index]);
                 }
-                $javascript[$name]['type'] = 'external';
+                $javascript[$path]['type'] = 'external';
               }
             }
           }
