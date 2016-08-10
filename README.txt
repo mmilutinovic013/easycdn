@@ -27,7 +27,7 @@ Credits
 Project page: https://www.drupal.org/project/easycdn
 
 Module originally written by:
-Mark Milutinovic (mmilutinovic1313) - http://drupal.org/user/372872
+Mark Milutinovic (mmilutinovic1313) - https://www.drupal.org/user/2847947
 
 Maintainers:
-Mark Milutinovic (mmilutinovic1313) - http://drupal.org/user/411999
+Mark Milutinovic (mmilutinovic1313) - https://www.drupal.org/user/2847947
