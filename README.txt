@@ -6,6 +6,9 @@ and allows administrators to load these libraries locally or via CDN. The
 current CDN options are: JSDelivr and CDNJS. Libraries are loaded with from
 the CDN based on the local version of the library that is installed.
 
+NOTE: If a library or library version cannot be found on the CDN it will default
+to loading the library locally.
+
 Documentation
 =============
 
