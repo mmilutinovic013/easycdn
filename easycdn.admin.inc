@@ -16,10 +16,14 @@ function easycdn_admin_general_settings_form($form, &$form_state) {
   $form = array();
   $rows = array();
   $header = array();
+  $versions = array();
+  $cdnjs_format_versions = array();
+  $jsdelivr_format_versions = array();
 
   $libraries = libraries_detect();
   foreach ($libraries as $machine_name => $library) {
     array_push($header, $libraries[$machine_name]['machine name']);
+    $versions = getVersions($libraries[$machine_name]['machine name']);
     // This is to specify the vertical tab holder.
     // One page can have two vertical tabs, but it's always one main tab with sub tabs.
     $form['easycdn']['explanation'] = array(
@@ -41,16 +45,28 @@ function easycdn_admin_general_settings_form($form, &$form_state) {
         'CDN_CDNJS' => t('CDNJS (Limited China Support)'),
         ),
       '#default_value' => variable_get('easycdn_cdn_' . $machine_name, ''),
-
     );
     $form['easycdn'][$machine_name]['easycdn_version_' . $machine_name] = array(
       '#title' => t('Version'),
       '#type' => 'select',
-      '#options' => array(
-        $libraries[$machine_name]['version']
-        ),
       '#default_value' => variable_get('easycdn_version_'. $machine_name, ''),
     );
+    if (variable_get('easycdn_cdn_' . $libraries[$machine_name]['machine name']) === 'CDN_JSDELIVR'){
+      $jsdelivr_format_versions = $versions;
+      $form['easycdn'][$machine_name]['easycdn_version_' . $machine_name]['#options'] = $jsdelivr_format_versions;
+    }
+    elseif (variable_get('easycdn_cdn_' . $libraries[$machine_name]['machine name']) === 'CDN_CDNJS'){
+      // Push the local version first so we never have a blank array
+      $jsdelivr_format_versions = $versions;
+      foreach ($versions as $version => $value) {
+        array_push($cdnjs_format_versions, $versions[$version]['version']);
+      }
+      $form['easycdn'][$machine_name]['easycdn_version_' . $machine_name]['#options'] = $cdnjs_format_versions;
+    }
+    else {
+      array_push($versions, $libraries[$machine_name]['version'] . ' =  local version');
+      $form['easycdn'][$machine_name]['easycdn_version_' . $machine_name]['#options'] = $versions;
+    }
   }
   return system_settings_form($form);
 }

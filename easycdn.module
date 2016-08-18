@@ -62,36 +62,37 @@ function easycdn_js_alter(&$javascript) {
         //
       }
       $version = $library['version'];
+      $version_index = variable_get('easycdn_version_'. $library['machine name']);
       if (!empty($library) && !empty($version)) {
         $cdn_version_arr_elements = getVersions($name);
         if (!empty($cdn_version_arr_elements)) {
-          foreach ($cdn_version_arr_elements as $element => $value) {
+          //foreach ($cdn_version_arr_elements as $element => $value) {
             if (variable_get('easycdn_cdn_' . $name) === 'CDN_CDNJS') {
-              $cdn_version_arr_elements_str = $cdn_version_arr_elements[$element]['version'];
+              $cdn_version = $cdn_version_arr_elements[$version_index]['version'];
             }
             elseif (variable_get('easycdn_cdn_' . $name) === 'CDN_JSDELIVR') {
-              $cdn_version_arr_elements_str = $cdn_version_arr_elements[$element];
+              $cdn_version = $cdn_version_arr_elements[$version_index];
              }
-            if(strcmp($cdn_version_arr_elements_str, $version) === 0) {
+            //if(strcmp($cdn_version, $version) === 0) {
               if (variable_get('easycdn_cdn_' . $name) === 'CDN_CDNJS') {
-                $files = $cdn_version_arr_elements[$element]['files'];
+                $files = $cdn_version_arr_elements[$version_index]['files'];
               }
               elseif (variable_get('easycdn_cdn_' . $name) === 'CDN_JSDELIVR') {
-                $content = file_get_contents('http://api.jsdelivr.com/v1/jsdelivr/libraries/' . $name . '/' . $version);
+                $content = file_get_contents('http://api.jsdelivr.com/v1/jsdelivr/libraries/' . $name . '/' . $cdn_version);
                 $files = json_decode($content, true);
               }
               foreach ($files as $index => $value) {
                 if (variable_get('easycdn_cdn_' . $name) === 'CDN_CDNJS') {
-                $javascript[$path]['data'] = 'http://cdnjs.cloudflare.com/ajax/libs/'. $name .'/' . $version .'/' . $files[$index]; //strval($files[$index]);
+                $javascript[$path]['data'] = 'http://cdnjs.cloudflare.com/ajax/libs/'. $name .'/' . $cdn_version .'/' . $files[$index]; //strval($files[$index]);
                 }
                 elseif (variable_get('easycdn_cdn_' . $name) === 'CDN_JSDELIVR') {
-                  $javascript[$path]['data'] = 'https://cdn.jsdelivr.net/'. $name . '/' . $version . '/' .strval($files[$index]);
+                  $javascript[$path]['data'] = 'https://cdn.jsdelivr.net/'. $name . '/' . $cdn_version . '/' .strval($files[$index]);
                 }
                 $javascript[$path]['type'] = 'external';
               }
             }
-          }
-        }
+          //}
+        //}
       }
     }
   }
@@ -119,6 +120,5 @@ function getVersions($name) {
   else {
     // return blank array === no CDN Selected
   }
-
   return $versions;
 }
