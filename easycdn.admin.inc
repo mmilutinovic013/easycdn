@@ -1,13 +1,8 @@
 <?php
-
 /**
  * @file
- * Settings administration UI.
+ * EasyCDN administration UI.
  */
-
-
-//----------------------------------------------------------------------------
-// Form API callbacks.
 
 /**
  * Form definition; general settings.
@@ -19,13 +14,10 @@ function easycdn_admin_general_settings_form($form, &$form_state) {
   $versions = array();
   $cdnjs_format_versions = array();
   $jsdelivr_format_versions = array();
-
   $libraries = libraries_detect();
   foreach ($libraries as $machine_name => $library) {
     array_push($header, $libraries[$machine_name]['machine name']);
     $versions = getVersions($libraries[$machine_name]['machine name']);
-    // This is to specify the vertical tab holder.
-    // One page can have two vertical tabs, but it's always one main tab with sub tabs.
     $form['easycdn']['explanation'] = array(
       '#title' => t('Choose from the libraries below and adjust its settings to choose to serve its files from a cdn or locally.'),
       );
